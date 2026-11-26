@@ -63,13 +63,13 @@ def rasterize_points(
     """Rasterize points into glyph/color buffers, keeping the nearest Z per cell."""
     glyphs = np.full((rows, columns), " ", dtype="<U1")
     colors = np.zeros((rows, columns, 3), dtype=np.uint8)
-    zbuffer = np.full((rows, columns), -np.inf, dtype=np.float32)
+    zbuffer = np.full((rows, columns), np.inf, dtype=np.float32)
     for point in points:
         projected = project_point((point.x, point.y, point.z), rotation, columns, rows)
         if projected is None:
             continue
         column, row, depth = projected
-        if depth <= zbuffer[row, column]:
+        if depth >= zbuffer[row, column]:
             continue
         zbuffer[row, column] = depth
         color = point.color

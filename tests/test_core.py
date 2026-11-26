@@ -1,7 +1,7 @@
 from datetime import date, datetime, timedelta
 
 from renderer import project_point, rasterize_points
-from scene import ScenePoint
+from scene import ChristmasScene, ScenePoint
 from timer_modes import FocusTimer, countdown_target, format_countdown
 
 
@@ -11,14 +11,23 @@ def test_projection_places_center_point_in_grid() -> None:
     assert projected[:2] == (44, 34)
 
 
-def test_z_buffer_keeps_nearest_point() -> None:
+def test_z_buffer_keeps_nearest_point_independent_of_draw_order() -> None:
     points = [
         ScenePoint(0, 0, -1, "x", (100, 0, 0), kind="ornament"),
         ScenePoint(0, 0, 1, "@", (0, 100, 0), kind="ornament"),
     ]
-    frame = rasterize_points(points, 0)
-    assert frame.glyphs[34, 44] == "@"
-    assert tuple(frame.colors[34, 44]) == (0, 100, 0)
+    for order in (points, list(reversed(points))):
+        frame = rasterize_points(order, 0)
+        assert frame.glyphs[34, 44] == "x"
+        assert tuple(frame.colors[34, 44]) == (100, 0, 0)
+        assert frame.zbuffer[34, 44] == -1
+
+
+def test_foliage_uses_selected_palette() -> None:
+    scene = ChristmasScene()
+    classic = next(point for point in scene.points(0.5, 0, 0, "classic") if point.kind == "tree")
+    frost = next(point for point in scene.points(0.5, 0, 0, "frost") if point.kind == "tree")
+    assert classic.color != frost.color
 
 
 def test_countdown_uses_christmas_then_new_year() -> None:

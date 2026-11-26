@@ -204,7 +204,17 @@ class ChristmasScene:
         """Return currently revealed objects with palette and twinkle applied."""
         palette = PALETTES[theme]
         result = list(self.ground_points)
-        result.extend(point for point in self.tree_points if point.layer <= progress)
+        classic_foliage = PALETTES["classic"]["foliage"]
+        for point in self.tree_points:
+            if point.layer <= progress:
+                shade = sum(
+                    point.color[channel] / classic_foliage[channel]
+                    for channel in range(3)
+                ) / 3
+                color = self._scaled(palette["foliage"], shade)
+                result.append(
+                    ScenePoint(point.x, point.y, point.z, point.glyph, color, point.layer, point.kind)
+                )
         if progress >= 0.64:
             result.extend(
                 ScenePoint(p.x, p.y, p.z, p.glyph, palette["garland"], p.layer, p.kind)

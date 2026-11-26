@@ -43,3 +43,5 @@ python main.py --headless-test
 | `Esc` | Quit |
 
 Run the logic tests with `python -m pytest`.
+
+This repository currently distributes the application as source code, not as a signed standalone installer. Users need Python 3.10+ and the dependencies above. The app renders locally and does not make network requests; screenshot export only writes PNGs to `exports/`.
